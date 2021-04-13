@@ -1,0 +1,121 @@
+ 
+
+____________________________________________
+   |
+ # |          Production Rule
+___|________________________________________   
+ 1 | goal         -> expr
+ 2 | expr         -> term exprtail
+ 3 | exprtail     -> + term exprtail
+ 4 |              |  - term exprtail
+ 5 |              |  e
+ 6 | term         -> factor termtail
+ 7 | termtail     -> ** factor termtail
+ 8 |              |  e
+ 9 | factor      -> num
+10 |             |  (expr)
+11 | num         -> digit numtail
+12 | numtail     -> digit numtail
+13 |             |  e
+14 | digit       -> 0|1|2|3|4|5|6|7|8|9
+___|________________________________________
+
+
+------------------
+
+FIRST():
+
+
+First(goal)         = {0 .. 9, (}
+First(expr)         = {0 .. 9, (}
+First(exprtail)     = {+, -, e}
+First(term)         = {0 .. 9, (}
+First(termtail)     = {**, e}
+First(factor)       = {0 .. 9, (}
+First(num)          = {0 .. 9}
+First(numtail)      = {0 .. 9, e}
+First(digit)        = {0 .. 9}
+
+------------------
+
+FOLLOW():
+
+Follow(goal)        = {$}
+Follow(expr)        = {), $}
+Follow(exprtail)    = Follow(expr) = {), $}
+Follow(term)        = First(exprtail) = {+, -, e}
+Follow(termtail)    = Follow(term) = {+, -, e}
+Follow(factor)      = First(termtail) = {**, e}
+Follow(num)         = Follow(factor) = {**, e}
+Follow(numtail)     = Follow(num) = {**, e}
+Follow(digit)       = First(numtail) = {0 .. 9, e}
+
+------------------
+
+FIRST+()
+
+
+First+(goal)        = First(goal) = {0 .. 9, (}
+First+(expr)        = First(expr) = {0 .. 9, (}
+First+(exprtail)    = First(exprtail) U Follow(exprtail) = {+, -, ), $}
+First+(term)        = First(term) = {0 .. 9, (}
+
+First+(termtail)    = First(termtail) U Follow(termtail) 
+                    = First(termtail) U Follow(term)
+                    = First(termtail) U First(exprtail)
+                    = {**} U {+, -} U Follow(exprtail)
+                    = {**} U {+, -} U {), $}
+                    = {**, +, -, ), $}
+
+First+(factor)      = {0 .. 9, (}
+First+(num)         = {0 .. 9}
+
+First+(numtail)     = First(numtail) U Follow(numtail)
+                    = {0 .. 9} U Follow(num)
+                    = {0 .. 9} U First(termtail)
+                    = {0 .. 9} U {**} U Follow(termtail)
+                    = {0 .. 9} U {**} U First(exprtail)
+                    = {0 .. 9} U {**} U {+, -} U Follow(exprtail)
+                    = {0 .. 9} U {**} U {+, -, ), $}
+                    = {0 .. 9,**,+,-,),$}
+
+First+(digit)       = {0 .. 9}
+
+------------------
+
+Lookahead table:
+
+____________________________________________________________________
+
+Symbol      |  0..9 |   +   |   -   |  **   |   (   |   )   |   $   |
+            |--------------------------------------------------------
+goal        |   #1  |  err  |  err  |  err  |  #1   |  err  |  err  |         
+            |--------------------------------------------------------
+epxr        |   #2  |  err  |  err  |  err  |  #2   |  err  |  err  |
+            |--------------------------------------------------------
+exprtail    |   err |  #3   |  #4   |  err  |  err  |  #5   |  #5   |
+            |--------------------------------------------------------
+term        |  #6   |  err  |  err  |  err  |  #6   |  err  |  err  |
+            |--------------------------------------------------------
+termtail    |  err  |  #8   |  #8   |  #7   |  err  |  #8   |  #8   |
+            |--------------------------------------------------------
+factor      |  #9   |  err  |  err  |  err  |  #10  |  err  |  err  |
+            |--------------------------------------------------------
+num         |  #11  |  err  |  err  |  err  |  err  |  err  |  err  |
+            |--------------------------------------------------------
+numtail     |  #12  |  #13  |  #13  |  #13  |  err  |  #13  |  #13  |
+            |--------------------------------------------------------
+digit       |  #14  |  err  |  err  |  err  |  err  |  err  |  err  |
+____________________________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
