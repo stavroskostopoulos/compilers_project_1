@@ -78,7 +78,7 @@ class TernaryEvaluator {
                 int value_minus = Term();
 
                 return ExprTail(condition - value_minus); 
-            default: //e    #5
+            default: // e   #5
             
                 return condition;
         }
@@ -108,12 +108,26 @@ class TernaryEvaluator {
         }else if(lookahead == '('){ //#10
             System.out.println("mh please");
 
-            int cond = '(';
-            consume(lookahead);
-                     
+            consume('(');
+            int value = Expr();
+            
+            if(lookahead == ')'){
+                //parenthesis closed properly
+                consume(')');
+                
+                return value;
+
+            }else{
+
+                throw new ParseError();
+
+            }
+            
+            
+        }else{
+            throw new ParseError();
         }
 
-        throw new ParseError();
     }
 
     private int Num() throws IOException, ParseError {
