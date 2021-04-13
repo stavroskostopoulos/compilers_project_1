@@ -1,18 +1,5 @@
 import java.io.InputStream;
 import java.io.IOException;
-/*
-* -------------------------------------------------------------------------
-* 	        |     '0' .. '9'     |  ':'    |       '?'          |  $    |
-* -------------------------------------------------------------------------
-* 	        |		             |	       |	                |       |
-* Tern      | '0'..'9' TernTail  |  error  |       error        | error |
-*           | 	   	             |	       |    	            |       |
-* -------------------------------------------------------------------------
-*           |		             |	       |		            |       |
-* TernTail  |       error	     |    e    |  '?' Tern ':' Tern |   e   |
-* 	        |	  	             |	       |    	     	    |       |
-* -------------------------------------------------------------------------
-*/
 
 
 class TernaryEvaluator {
@@ -41,7 +28,7 @@ class TernaryEvaluator {
     }
 
     public int eval() throws IOException, ParseError {
-        System.out.println("eval");
+        
         int value = Expr();
 
         if (lookahead != '\r' && lookahead != '\n')
@@ -52,14 +39,11 @@ class TernaryEvaluator {
 
     private int Expr() throws IOException, ParseError {
         //first character is always a digit!!!
-        System.out.println("expr");
-
+        
         int value = Term();
         
-        
-
         return ExprTail(value);
-        //throw new ParseError();
+        
     }
 
     private int ExprTail(int condition) throws IOException, ParseError {
@@ -81,33 +65,49 @@ class TernaryEvaluator {
             default: // e   #5
             
                 return condition;
-        }
+        }      
 
-           
-
-        //throw new ParseError();
     }
 
 
     private int Term() throws IOException, ParseError {
-        System.out.println("term");
-
-        int value = Factor();
         
-        return value;
-        //throw new ParseError();
+        int value = Factor();
+         
+        return TermTail(value);
+       
+    }
+
+    private int TermTail(int condition) throws IOException, ParseError {
+        
+        if(lookahead == '*'){// get **   #7
+
+            consume('*');
+            if(lookahead == '*'){// get the second *
+
+                consume('*');
+                int power = Factor();
+                
+                return TermTail((int)Math.pow(condition, power)); //math pow works with double so we cast to int
+
+            }else{// did not receive the second *
+                throw new ParseError();
+            }
+
+        }else{// e     #8
+            return condition;
+        }      
+        
     }
 
     private int Factor() throws IOException, ParseError {
-        System.out.println("factor");
-        
+            
         if (isDigit(lookahead)) { // #9
             return Num();
 
             
         }else if(lookahead == '('){ //#10
-            System.out.println("mh please");
-
+            
             consume('(');
             int value = Expr();
             
@@ -118,31 +118,27 @@ class TernaryEvaluator {
                 return value;
 
             }else{
-
+                
                 throw new ParseError();
-
             }
-            
-            
+                   
         }else{
             throw new ParseError();
         }
 
     }
 
-    private int Num() throws IOException, ParseError {
-        System.out.println("num");
+    private int Num() throws IOException, ParseError {   
 
         //read the first digit of our number
         int value = Digit();
         
         return NumTail(value);
-        //throw new ParseError();
+        
     }
 
     private int NumTail(int condition) throws IOException, ParseError {
-        System.out.println("numtail");
-
+        
         if (isDigit(lookahead)) { //if there is a number #12
             
             int value = Digit();
@@ -163,19 +159,17 @@ class TernaryEvaluator {
             return condition; // there is nothing #13
         }
 
-        //throw new ParseError();
+        
     }
 
 
     private int Digit() throws IOException, ParseError {
-        System.out.println("digit");
 
         int cond = evalDigit(lookahead);
         consume(lookahead);
         
         return cond;
 
-        //throw new ParseError();
     }
 
 }
