@@ -65,20 +65,20 @@ class TernaryEvaluator {
     private int ExprTail(int condition) throws IOException, ParseError {
         
         switch(lookahead){
-            case '+': // +
+            case '+': // +  #3
 
                 consume(lookahead);
                 int value_plus = Term();
 
                 return ExprTail(condition + value_plus); 
 
-            case '-': // -
+            case '-': // -  #4
 
                 consume(lookahead);
                 int value_minus = Term();
 
                 return ExprTail(condition - value_minus); 
-            default: //e
+            default: //e    #5
             
                 return condition;
         }
@@ -119,17 +119,46 @@ class TernaryEvaluator {
     private int Num() throws IOException, ParseError {
         System.out.println("num");
 
-        return Digit();
+        //read the first digit of our number
+        int value = Digit();
         
+        return NumTail(value);
+        //throw new ParseError();
+    }
+
+    private int NumTail(int condition) throws IOException, ParseError {
+        System.out.println("numtail");
+
+        if (isDigit(lookahead)) { //if there is a number #12
+            
+            int value = Digit();
+            // value keeps our new digit,and the argument condition holds our number
+
+            //convert both of them to strings
+            String left_part = Integer.toString(condition);
+            String new_digit = Integer.toString(value);
+
+            //concat
+            String final_number = left_part + new_digit;
+
+
+            return NumTail(Integer.parseInt(final_number));
+            
+
+        }else{
+            return condition; // there is nothing #13
+        }
 
         //throw new ParseError();
     }
+
 
     private int Digit() throws IOException, ParseError {
         System.out.println("digit");
 
         int cond = evalDigit(lookahead);
         consume(lookahead);
+        
         return cond;
 
         //throw new ParseError();
