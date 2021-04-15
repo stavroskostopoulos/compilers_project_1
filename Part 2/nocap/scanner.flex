@@ -78,6 +78,8 @@ dec_int_lit = 0 | [1-9][0-9]*
  ")"            { return symbol(sym.RPAREN); }
  ";"            { return symbol(sym.SEMI); }
  ","            { return symbol(sym.COMMA); }
+ "{"            { return symbol(sym.LCBRA); }
+ "}"            { return symbol(sym.RCBRA); }
  {dec_int_lit}  { return symbol(sym.NUMBER, new Integer(yytext())); }
  \"             { stringBuffer.setLength(0); yybegin(STRING); }
  {WhiteSpace}   { /* just skip what was found, do nothing */ }

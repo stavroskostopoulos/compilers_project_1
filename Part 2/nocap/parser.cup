@@ -21,13 +21,13 @@ scan with {: return s.next_token(); :};
  */
 
 /* Terminals (tokens returned by the scanner). */
-terminal            SEMI, PLUS, MINUS, EXP, LPAREN, RPAREN, COMMA;
+terminal            SEMI, PLUS, MINUS, EXP, LPAREN, RPAREN, COMMA, LCBRA, RCBRA;
 terminal Integer    NUMBER;        // our scanner provides numbers as integers
 terminal String     STRING_LITERAL;
 
 /*  Non terminals */
 non terminal            program;
-non terminal String    function_declare, function_name, arguments_list, argument;      // used to store evaluated subexpressions
+non terminal String    function_list, function_declare, function_name, arguments_list, argument;      // used to store evaluated subexpressions
 
 /**
  *  Precedence Declarations
@@ -39,7 +39,7 @@ precedence right EXP;
  *  The Grammar Rules
  */
 
-program ::= function_declare:e {:
+program ::= function_list:e {:
 			System.out.println("import java.lang.Math;\n");
 			System.out.println("public class Main {");
 			System.out.println("\tpublic static void main(String[] args) {");
@@ -50,21 +50,34 @@ program ::= function_declare:e {:
 			 :}
 	;
 
-/* function declare is name( arg1, arg2, arg3) { blah blah } */
-/* 					  funame    arglist                      */
-function_declare ::= function_name:funname LPAREN arguments_list:arglist RPAREN    {: RESULT = String.format("\t%s(%s) {\n\n\t}\n", funname, arglist); :}
-                    |                                       			  		   {: RESULT = ""; :}
+/* Function declaration*/
+
+function_list ::= function_list:rest function_declare:upcomingfunc RCBRA				{: RESULT = String.format("\t%s\n%s", rest, upcomingfunc); :}
+				|																		{: RESULT = ""; :}
+				;
+
+	/* function declare is name( arg1, arg2, arg3) { blah blah } */
+	/* 					  funame    arglist      LCBRA                */
+function_declare ::= function_name:funname LPAREN arguments_list:arglist RPAREN LCBRA   {: RESULT = String.format("\tpublic static String %s(%s) {\n\n\t}\n", funname, arglist); :}
+                    |                                       			  		   		{: RESULT = ""; :}
                     ;
 
 
-function_name ::= NUMBER:n                     		{: RESULT = String.format("%d", n); :}
-             		| STRING_LITERAL:s             	{: RESULT = String.format("Integer.parseInt(\"%s\", 16)", s); :}  
+function_name ::= NUMBER:n                     											{: RESULT = String.format("%d", n); :}
+             		| STRING_LITERAL:s             										{: RESULT = String.format("Integer.parseInt(\"%s\", 16)", s); :}  
              		;
 
+/*-----------------------*/
 
-arguments_list ::= arguments_list:rest argument:arg COMMA				{: RESULT = String.format("%s %s", rest, a); :}
-				|                               					{: RESULT = ""; :}
+
+
+/* The list of arguments*/
+arguments_list ::= arguments_list:rest COMMA argument:arg								{: RESULT = String.format("%s, %s", rest, arg); :}
+				|	argument:singlearg													{: RESULT = String.format("%s", singlearg); :}
+				|                               										{: RESULT = ""; :}
             	;
 
-argument ::= NUMBER:numb             							{: RESULT = String.format(", String %d", numb); :}  
-            	;
+argument ::= STRING_LITERAL:s             												{: RESULT = String.format("String %s", s); :}  
+            ;
+
+/*-----------------------*/
