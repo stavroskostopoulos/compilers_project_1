@@ -63,6 +63,7 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
    one and nine followed by zero or more numbers between zero and nine
    or just a zero.  */
 dec_int_lit = 0 | [1-9][0-9]*
+identifier = [a-zA-Z_][0-9a-zA-Z_]*
 
 %state STRING
 
@@ -82,6 +83,7 @@ dec_int_lit = 0 | [1-9][0-9]*
  "}"            { return symbol(sym.RCBRA); }
  {dec_int_lit}  { return symbol(sym.NUMBER, new Integer(yytext())); }
  \"             { stringBuffer.setLength(0); yybegin(STRING); }
+ {identifier}    { stringBuffer.setLength(0); stringBuffer.append( yytext() ); return symbol(sym.ID, stringBuffer.toString());}
  {WhiteSpace}   { /* just skip what was found, do nothing */ }
 }
 
