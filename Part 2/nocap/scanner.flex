@@ -79,6 +79,7 @@ identifier = [a-zA-Z_][0-9a-zA-Z_]*
  ")"            { return symbol(sym.RPAREN); }
  ";"            { return symbol(sym.SEMI); }
  ","            { return symbol(sym.COMMA); }
+ "prefix"       { return symbol(sym.PREFIX); }
  "{"            { return symbol(sym.LCBRA); }
  "}"            { return symbol(sym.RCBRA); }
  {dec_int_lit}  { return symbol(sym.NUMBER, new Integer(yytext())); }
