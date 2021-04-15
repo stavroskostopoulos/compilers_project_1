@@ -1,0 +1,70 @@
+/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
+/**
+ *  Package and Import Specifications
+ */
+import java_cup.runtime.*;
+
+/**
+ *  Usercode Components
+ */
+parser code {:
+    // Connect this parser to a scanner!
+    Scanner s;
+    Parser(Scanner s){ this.s=s; }
+:}
+
+/* define how to connect to the scanner! */
+scan with {: return s.next_token(); :};
+
+/**
+ *  Symbol Lists
+ */
+
+/* Terminals (tokens returned by the scanner). */
+terminal            SEMI, PLUS, MINUS, EXP, LPAREN, RPAREN, COMMA;
+terminal Integer    NUMBER;        // our scanner provides numbers as integers
+terminal String     STRING_LITERAL;
+
+/*  Non terminals */
+non terminal            program;
+non terminal String    function_declare, function_name, arguments_list, argument;      // used to store evaluated subexpressions
+
+/**
+ *  Precedence Declarations
+ */
+precedence left PLUS, MINUS;
+precedence right EXP;
+
+/**
+ *  The Grammar Rules
+ */
+
+program ::= function_declare:e {:
+			System.out.println("import java.lang.Math;\n");
+			System.out.println("public class Main {");
+			System.out.println("\tpublic static void main(String[] args) {");
+			
+			System.out.println("\t}");
+			System.out.printf("%s", e);
+			System.out.println("}");
+			 :}
+	;
+
+/* function declare is name( arg1, arg2, arg3) { blah blah } */
+/* 					  funame    arglist                      */
+function_declare ::= function_name:funname LPAREN arguments_list:arglist RPAREN    {: RESULT = String.format("\t%s(%s) {\n\n\t}\n", funname, arglist); :}
+                    |                                       			  		   {: RESULT = ""; :}
+                    ;
+
+
+function_name ::= NUMBER:n                     		{: RESULT = String.format("%d", n); :}
+             		| STRING_LITERAL:s             	{: RESULT = String.format("Integer.parseInt(\"%s\", 16)", s); :}  
+             		;
+
+
+arguments_list ::= arguments_list:rest argument:arg COMMA				{: RESULT = String.format("%s %s", rest, a); :}
+				|                               					{: RESULT = ""; :}
+            	;
+
+argument ::= NUMBER:numb             							{: RESULT = String.format(", String %d", numb); :}  
+            	;
