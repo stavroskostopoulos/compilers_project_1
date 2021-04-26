@@ -21,7 +21,7 @@ scan with {: return s.next_token(); :};
  */
 
 /* Terminals (tokens returned by the scanner). */
-terminal            SEMI, PLUS, MINUS, EXP, LPAREN, RPAREN, COMMA, LCBRA, RCBRA, PREFIX;
+terminal            SEMI, PLUS, MINUS, EXP, LPAREN, RPAREN, COMMA, LCBRA, RCBRA, PREFIX, SUFFIX;
 terminal Integer    NUMBER;        // our scanner provides numbers as integers
 terminal String     STRING_LITERAL, ID;
 
@@ -54,15 +54,14 @@ program ::= function_list:e top_function:calls{:
 
 /*  Top function calls  */ 
 
-
-top_function ::= function_name:fname LPAREN call_args:topargs RPAREN		{: RESULT = String.format("%s (%s)", fname, topargs); :}
-				| function_name:fname LPAREN RPAREN							{: RESULT = String.format("%s ()", fname); :}
-				|															{: RESULT = ""; :}
+top_function ::= function_name:fname LPAREN call_args:topargs RPAREN top_function:nextupfunc		{: RESULT = String.format("%s (%s)\n\t%s", fname, topargs, nextupfunc); :}
+				| function_name:fname LPAREN RPAREN	top_function:nextupfunc							{: RESULT = String.format("%s ()\n\t%s", fname, nextupfunc); :}
+				|																					{: RESULT = ""; :}
 				;
 
-call_args ::= STRING_LITERAL:s                      						{: RESULT = String.format("\"%s\"", s); :}
-            | STRING_LITERAL:s COMMA call_args:next 						{: RESULT = String.format("\"%s\", %s",s,next); :}
-            | argument:s LPAREN call_args:args RPAREN     					{: RESULT = String.format("%s(%s)", s,args); :}
+call_args ::= STRING_LITERAL:s                      												{: RESULT = String.format("\"%s\"", s); :}
+            | STRING_LITERAL:s COMMA call_args:next 												{: RESULT = String.format("\"%s\", %s",s,next); :}
+            | argument:s LPAREN call_args:args RPAREN     											{: RESULT = String.format("%s(%s)", s,args); :}
             ;
 
 /*-----------------------*/
@@ -111,10 +110,12 @@ addition ::= addition:rest PLUS addition:addelem										{: RESULT = String.for
 			| ID:s																		{: RESULT = String.format("%s", s); :}
 			;
 
-prefix_phrase ::= prefix_elem:e1 PREFIX prefix_elem:e2									{: RESULT = String.format("%s.startsWith(\"%s\");", e2, e1); :}
+/* prefix / suffix operation */
+prefix_phrase ::= prefix_elem:e1 PREFIX prefix_elem:e2									{: RESULT = String.format("%s.startsWith(%s);", e2, e1); :}
+				| prefix_elem:e1 SUFFIX prefix_elem:e2									{: RESULT = String.format("%s.endsWith(%s);", e2, e1); :}
 				;
 
-prefix_elem ::= STRING_LITERAL:str														{: RESULT = String.format("%s", str); :}
+prefix_elem ::= STRING_LITERAL:str														{: RESULT = String.format("\"%s\"", str); :}
 			| ID:elem																	{: RESULT = String.format("%s", elem); :}
 			;
 			
