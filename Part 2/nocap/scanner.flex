@@ -73,11 +73,8 @@ identifier = [a-zA-Z_][0-9a-zA-Z_]*
 <YYINITIAL> {
 /* operators */
  "+"            { return symbol(sym.PLUS); }
- "-"            { return symbol(sym.MINUS); }
- "**"           { return symbol(sym.EXP); }
  "("            { return symbol(sym.LPAREN); }
  ")"            { return symbol(sym.RPAREN); }
- ";"            { return symbol(sym.SEMI); }
  ","            { return symbol(sym.COMMA); }
  "prefix"       { return symbol(sym.PREFIX); }
  "suffix"       { return symbol(sym.SUFFIX); }
@@ -85,7 +82,6 @@ identifier = [a-zA-Z_][0-9a-zA-Z_]*
  "else"         { return symbol(sym.ELSE); }
  "{"            { return symbol(sym.LCBRA); }
  "}"            { return symbol(sym.RCBRA); }
- {dec_int_lit}  { return symbol(sym.NUMBER, new Integer(yytext())); }
  \"             { stringBuffer.setLength(0); yybegin(STRING); }
  {identifier}    { stringBuffer.setLength(0); stringBuffer.append( yytext() ); return symbol(sym.ID, stringBuffer.toString());}
  {WhiteSpace}   { /* just skip what was found, do nothing */ }
