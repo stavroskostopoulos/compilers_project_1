@@ -40,8 +40,8 @@ precedence right EXP;
  */
 
 program ::= function_list:e top_function:calls{:
-			System.out.println("import java.lang.Math;\n");
-			System.out.println("public class Main {");
+			
+			System.out.println("\npublic class Main {");
 			System.out.println("\tpublic static void main(String[] args) {");
 			System.out.printf("%s\n", calls);
 			System.out.println("\t}");
@@ -49,6 +49,10 @@ program ::= function_list:e top_function:calls{:
 			
 			System.out.println("}");
 			 :}
+			 
+
+		
+
 	;
 
 
@@ -107,8 +111,7 @@ inner_arg_list ::= inner_arg_list:rest COMMA function_body:arg 							{: RESULT 
 
 /* Function body */
 
-function_body ::= STRING_LITERAL:s             											{: RESULT = String.format("\"%s\"", s); :}
-				| addition:addstr														{: RESULT = String.format("%s", addstr); :}
+function_body ::= addition:addstr														{: RESULT = String.format("%s", addstr); :}
 				| prefix_phrase:prefphr                                                 {: RESULT = String.format("%s",prefphr ); :}
 				| IF LPAREN prefix_phrase:c RPAREN function_body:e1 ELSE function_body:e2	{: RESULT = String.format("%s ? %s : %s", c, e1, e2); :}
 				| argument:s LPAREN inner_arg_list:args RPAREN								{: RESULT = String.format("%s(%s)",s, args); :}
@@ -117,6 +120,7 @@ function_body ::= STRING_LITERAL:s             											{: RESULT = String.for
 
 addition ::= addition:rest PLUS addition:addelem										{: RESULT = String.format("%s + %s", rest, addelem); :}
 			| ID:s																		{: RESULT = String.format("%s", s); :}
+			| STRING_LITERAL:s             												{: RESULT = String.format("\"%s\"", s); :}
 			;
 
 /*    if - else          */ 
